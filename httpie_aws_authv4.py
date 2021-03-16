@@ -4,6 +4,7 @@ AWS-v4 auth plugin for HTTPie.
 
 """
 import re
+import io
 
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from boto3 import session
@@ -76,6 +77,11 @@ class AWSAuth(object):
         except Exception as error:
             print("Error parsing URL: %s" % error)
             raise
+
+        if isinstance(r.body, io.RawIOBase):
+            r.body = r.body.readall()
+        elif isinstance(r.body, (io.BufferedIOBase, io.TextIOBase)):
+            r.body = r.body.read()
 
         aws_request = AWSRequestsAuth(
             aws_access_key=self.aws_access_key,
